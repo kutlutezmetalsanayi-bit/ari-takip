@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 class GooglePlayBillingManager private constructor(private val appContext: Context) : PurchasesUpdatedListener {
 
@@ -120,10 +121,6 @@ class GooglePlayBillingManager private constructor(private val appContext: Conte
     }
   }
 
-  /**
-   * Reads the subscription and its actual offer tokens from Google Play.
-   * The app never invents an offer token; it always uses the token returned by Play.
-   */
   fun queryProductDetails(onReady: (() -> Unit)? = null) {
     if (!billingClient.isReady) {
       onReady?.invoke()
@@ -155,7 +152,7 @@ class GooglePlayBillingManager private constructor(private val appContext: Conte
         proProductDetails = null
         monthlyOfferToken = null
         yearlyOfferToken = null
-        _statusMessage.value = "Google Play'de '${PRODUCT_ID_PRO}' aboneliği bulunamadı."
+        _statusMessage.value = "Google Play'de '$PRODUCT_ID_PRO' aboneliği bulunamadı."
         Log.w(TAG, "Product not found: $PRODUCT_ID_PRO")
         onReady?.invoke()
         return@queryProductDetailsAsync
@@ -182,7 +179,6 @@ class GooglePlayBillingManager private constructor(private val appContext: Conte
         }
       }
 
-      // If Play returns different base-plan names, use the first available offer as a safe fallback.
       val offers = details.subscriptionOfferDetails.orEmpty()
       if (monthlyOfferToken == null && offers.isNotEmpty()) {
         monthlyOfferToken = offers.first().offerToken
@@ -219,10 +215,6 @@ class GooglePlayBillingManager private constructor(private val appContext: Conte
     }
   }
 
-  /**
-   * Starts the real Google Play purchase screen.
-   * It waits for ProductDetails and an actual offer token before calling launchBillingFlow.
-   */
   fun launchPurchase(activity: Activity, planType: String) {
     if (!billingClient.isReady) {
       _statusMessage.value = "Google Play bağlantısı kuruluyor..."
