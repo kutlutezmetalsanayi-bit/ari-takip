@@ -42,10 +42,9 @@ object PlanManager {
     isUnlimited = true
   )
 
-  // Standard product IDs prepared for Google Play Billing integration
-  val PRODUCT_ID_PRO = "ari_takip_pro"
-  val BASE_PLAN_MONTHLY = "monthly"
-  val BASE_PLAN_YEARLY = "yearly"
+  const val PRODUCT_ID_PRO = "ari_takip_pro"
+  const val BASE_PLAN_MONTHLY = "aylik"
+  const val BASE_PLAN_YEARLY = "yillik"
 
   val AVAILABLE_PRODUCTS = listOf(
     BillingProduct(
@@ -58,13 +57,12 @@ object PlanManager {
     BillingProduct(
       productId = "$PRODUCT_ID_PRO:$BASE_PLAN_YEARLY",
       title = "Arı Takip PRO (Yıllık)",
-      description = "Yıllık plan ile daha avantajlı! 2 ay hediye",
+      description = "Yıllık plan ile daha avantajlı",
       priceFormatted = "499,99 TL / Yıl",
       period = "Yıllık"
     )
   )
 
-  // Central subscription state (Defaults to FREE)
   private val _currentTier = MutableStateFlow(SubscriptionTier.FREE)
   val currentTier: StateFlow<SubscriptionTier> = _currentTier.asStateFlow()
 
@@ -73,24 +71,11 @@ object PlanManager {
 
   fun isPro(): Boolean = _currentTier.value == SubscriptionTier.PRO
 
-  /**
-   * Centralized check for whether an apiary can be created.
-   * Free plan allows 1 apiary. Pro allows unlimited.
-   */
   fun canAddApiary(currentActiveApiaryCount: Int): Boolean {
     if (isPro()) return true
     return currentActiveApiaryCount < FREE_LIMITS.maxApiaries
   }
 
-  /**
-   * Centralized check for whether a hive can be created.
-   * Free plan allows max 10 hives in an apiary (and total). Pro allows unlimited.
-   */
-  /**
-   * Centralized check for whether an active hive can be created.
-   * Free plan allows max 10 active hives in total. Pro allows unlimited.
-   * Archived hives do not count towards the 10 limit.
-   */
   fun canAddActiveHive(totalActiveHiveCount: Int): Boolean {
     if (isPro()) return true
     return totalActiveHiveCount < FREE_LIMITS.maxHivesTotal
@@ -101,10 +86,6 @@ object PlanManager {
     return currentHiveCountInApiary < FREE_LIMITS.maxHivesPerApiary && totalHiveCount < FREE_LIMITS.maxHivesTotal
   }
 
-  /**
-   * Test mode entitlement toggle for development and review purposes.
-   * Note: Real Google Play Billing purchases will activate this via Play Store verification.
-   */
   fun setTestSubscriptionTier(tier: SubscriptionTier) {
     _currentTier.value = tier
   }
