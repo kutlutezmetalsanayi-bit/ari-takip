@@ -1,0 +1,6 @@
+{
+  "name": "Arı Takip",
+  "description": "Profesyonel arıcılık yönetim sistemi - Kovanlar, ana arı takibi, oğul/bölme yönetimi, hastalık ve tedavi kayıtları, kontroller, besleme ve yedekleme",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
