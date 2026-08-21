@@ -136,7 +136,7 @@ class GooglePlayBillingManager private constructor(private val appContext: Conte
       .setProductList(listOf(product))
       .build()
 
-    billingClient.queryProductDetailsAsync(params) { billingResult, productDetailsList ->
+    billingClient.queryProductDetailsAsync(params) { billingResult, queryResult ->
       if (billingResult.responseCode != BillingClient.BillingResponseCode.OK) {
         proProductDetails = null
         monthlyOfferToken = null
@@ -145,6 +145,11 @@ class GooglePlayBillingManager private constructor(private val appContext: Conte
         Log.w(TAG, "queryProductDetails failed: ${billingResult.responseCode}, ${billingResult.debugMessage}")
         onReady?.invoke()
         return@queryProductDetailsAsync
+      }
+
+      val productDetailsList = queryResult.productDetailsList
+      queryResult.unfetchedProductList.forEach { unfetched ->
+        Log.w(TAG, "Product not fetched: ${unfetched.productId}, status=${unfetched.statusCode}")
       }
 
       val details = productDetailsList.firstOrNull { it.productId == PRODUCT_ID_PRO }
