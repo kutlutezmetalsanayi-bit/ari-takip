@@ -38,12 +38,25 @@ jobs:
           echo "$KEYSTORE_BASE64" | base64 --decode > "$GITHUB_WORKSPACE/my-upload-key.jks"
           test -s "$GITHUB_WORKSPACE/my-upload-key.jks"
 
+      - name: Validate upload keystore
+        env:
+          STORE_PASSWORD: ${{ secrets.UPLOAD_KEYSTORE_PASSWORD }}
+        run: |
+          if [ -z "$STORE_PASSWORD" ]; then
+            echo "UPLOAD_KEYSTORE_PASSWORD GitHub Secret tanımlı değil."
+            exit 1
+          fi
+          keytool -list -keystore "$GITHUB_WORKSPACE/my-upload-key.jks" \
+            -storepass "$STORE_PASSWORD" \
+            -alias "ari-takip" >/dev/null
+          echo "Upload keystore ve şifre doğrulandı."
+
       - name: Build signed Release Bundle
         env:
           KEYSTORE_PATH: ${{ github.workspace }}/my-upload-key.jks
           STORE_PASSWORD: ${{ secrets.UPLOAD_KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.UPLOAD_KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.UPLOAD_KEY_PASSWORD }}
+          KEY_ALIAS: ari-takip
+          KEY_PASSWORD: ${{ secrets.UPLOAD_KEYSTORE_PASSWORD }}
         run: gradle clean :app:bundleRelease
 
       - name: Verify AAB signature
